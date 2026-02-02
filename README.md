@@ -28,7 +28,7 @@ Transformez n'importe quelle image en un patron de tuiles LEGO pour créer des m
 1. **Téléchargez Python** : [python.org/downloads](https://www.python.org/downloads/)
    - ⚠️ **IMPORTANT** : Cochez ✅ "Add Python to PATH" pendant l'installation
 
-2. **Téléchargez Legofy** : [Télécharger ZIP](https://github.com/VOTRE_USERNAME/legofy/archive/refs/heads/main.zip)
+2. **Téléchargez Legofy** : [Télécharger ZIP](https://github.com/algotrader1/legofy/archive/refs/heads/main.zip)
    - Extrayez le ZIP dans un dossier (ex: `C:\Legofy`)
 
 3. **Double-cliquez sur `install_and_run.bat`**
@@ -90,7 +90,7 @@ Voir le [Guide d'installation détaillé](docs/INSTALLATION_WINDOWS.md)
 
 ### Installation
 ```bash
-git clone https://github.com/VOTRE_USERNAME/legofy.git
+git clone https://github.com/algotrader1/legofy.git
 cd legofy
 pip install -r requirements.txt
 python app.py
