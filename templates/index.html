@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legofy - Convertisseur d'images en motifs Lego</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .upload-zone:hover {
+            border-color: #48dbfb;
+            background: rgba(72, 219, 251, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: #48dbfb;
+            background: rgba(72, 219, 251, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .thumbnail-preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .slider-label {
+            font-size: 0.95rem;
+        }
+
+        .slider-value {
+            color: #48dbfb;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #48dbfb;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(72, 219, 251, 0.4);
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .input-group input[type="number"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #48dbfb;
+        }
+
+        .pieces-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .piece-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .piece-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .piece-option.selected {
+            border-color: #48dbfb;
+            background: rgba(72, 219, 251, 0.1);
+        }
+
+        .piece-option input {
+            display: none;
+        }
+
+        .piece-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .piece-option.selected .piece-checkbox {
+            background: #48dbfb;
+            border-color: #48dbfb;
+        }
+
+        .piece-option.selected .piece-checkbox::after {
+            content: "✓";
+            color: #1a1a2e;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .piece-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .piece-name {
+            font-size: 0.9rem;
+        }
+
+        .piece-part-num {
+            font-size: 0.75rem;
+            color: #888;
+            font-family: monospace;
+        }
+
+        .section-note {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #48dbfb;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+            color: #1a1a2e;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(72, 219, 251, 0.3);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+        }
+
+        .preview-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .preview-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-tab.active {
+            background: #48dbfb;
+            color: #1a1a2e;
+        }
+
+        .preview-content {
+            display: none;
+        }
+
+        .preview-content.active {
+            display: block;
+        }
+
+        .preview-images {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .preview-box {
+            text-align: center;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            background: #fff;
+            image-rendering: pixelated;
+        }
+
+        .preview-label {
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Live threshold preview */
+        .threshold-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .threshold-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            background: #fff;
+            image-rendering: pixelated;
+        }
+
+        .threshold-preview-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .stats-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #48dbfb;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .pieces-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .piece-count-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .piece-count-name {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .piece-count-title {
+            font-size: 0.9rem;
+        }
+
+        .piece-count-ref {
+            font-size: 0.75rem;
+            color: #888;
+            font-family: monospace;
+        }
+
+        .piece-count-value {
+            font-weight: 600;
+            color: #feca57;
+            font-size: 1.1rem;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #48dbfb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Legofy</h1>
+            <p class="subtitle">Convertisseur d'images en motifs Lego pour moules de sérigraphie</p>
+        </header>
+
+        <div class="main-grid">
+            <aside class="controls-panel">
+                <div class="section">
+                    <div class="section-title">
+                        <span>Image source</span>
+                    </div>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📁</div>
+                        <p>Glissez une image ici<br>ou cliquez pour sélectionner</p>
+                        <input type="file" id="imageInput" accept="image/*">
+                        <img id="thumbnailPreview" class="thumbnail-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span>Paramètres du seuil</span>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Seuil noir/blanc</span>
+                            <span class="slider-value" id="thresholdValue">128</span>
+                        </div>
+                        <input type="range" id="threshold" min="0" max="255" value="128">
+                    </div>
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="invert">
+                        <span>Inverser (noir ↔ blanc)</span>
+                    </label>
+
+                    <!-- Live threshold preview -->
+                    <div class="threshold-preview" id="thresholdPreview" style="display: none;">
+                        <img id="thresholdPreviewImg" src="" alt="Aperçu seuil">
+                        <p class="threshold-preview-label">Aperçu en temps réel</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span>Taille de la grille (en studs)</span>
+                    </div>
+                    <div class="grid-inputs">
+                        <div class="input-group">
+                            <label>Largeur</label>
+                            <input type="number" id="gridWidth" value="48" min="8" max="256">
+                        </div>
+                        <div class="input-group">
+                            <label>Hauteur</label>
+                            <input type="number" id="gridHeight" value="48" min="8" max="256">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span>Tuiles rectangulaires</span>
+                    </div>
+                    <div class="pieces-grid">
+                        {% for piece_id, piece in pieces.items() %}
+                        {% if piece.shape == 'rect' %}
+                        <label class="piece-option selected" data-piece="{{ piece_id }}">
+                            <input type="checkbox" name="pieces" value="{{ piece_id }}" checked>
+                            <div class="piece-checkbox"></div>
+                            <div class="piece-info">
+                                <span class="piece-name">{{ piece.name }}</span>
+                                <span class="piece-part-num">#{{ piece.part_num }}</span>
+                            </div>
+                        </label>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span>Tuiles Macaroni (quart de cercle)</span>
+                    </div>
+                    <div class="pieces-grid">
+                        {% for piece_id, piece in pieces.items() %}
+                        {% if piece.shape == 'macaroni' %}
+                        <label class="piece-option selected" data-piece="{{ piece_id }}">
+                            <input type="checkbox" name="pieces" value="{{ piece_id }}" checked>
+                            <div class="piece-checkbox"></div>
+                            <div class="piece-info">
+                                <span class="piece-name">{{ piece.name }}</span>
+                                <span class="piece-part-num">#{{ piece.part_num }}</span>
+                            </div>
+                        </label>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span>Tuiles rondes</span>
+                    </div>
+                    <div class="pieces-grid">
+                        {% for piece_id, piece in pieces.items() %}
+                        {% if piece.shape in ['round', 'quarter', 'half'] %}
+                        <label class="piece-option" data-piece="{{ piece_id }}">
+                            <input type="checkbox" name="pieces" value="{{ piece_id }}">
+                            <div class="piece-checkbox"></div>
+                            <div class="piece-info">
+                                <span class="piece-name">{{ piece.name }}</span>
+                                <span class="piece-part-num">#{{ piece.part_num }}</span>
+                            </div>
+                        </label>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="section-note">Les tuiles rondes sont décochées par défaut (usage spécialisé)</p>
+                </div>
+
+                <button class="process-btn" id="processBtn" disabled>
+                    Convertir en Lego
+                </button>
+            </aside>
+
+            <main class="results-panel">
+                <div class="preview-container">
+                    <div class="preview-tabs">
+                        <button class="preview-tab active" data-tab="lego">Résultat N/B</button>
+                        <button class="preview-tab" data-tab="binary">Image seuillée</button>
+                        <button class="preview-tab" data-tab="colored">Vue couleurs (aide)</button>
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Calcul du placement optimal des pièces...</p>
+                    </div>
+
+                    <div id="previewContent">
+                        <div class="empty-state" id="emptyState">
+                            <div class="empty-state-icon">🧱</div>
+                            <p>Chargez une image et cliquez sur "Convertir" pour voir le résultat</p>
+                        </div>
+
+                        <div class="preview-content active" id="legoPreview" style="display: none;">
+                            <div class="preview-box">
+                                <img id="legoImage" src="" alt="Résultat Lego N/B">
+                                <p class="preview-label">Motif Lego noir/blanc - prêt pour impression</p>
+                            </div>
+                        </div>
+
+                        <div class="preview-content" id="binaryPreview" style="display: none;">
+                            <div class="preview-box">
+                                <img id="binaryImage" src="" alt="Image binaire">
+                                <p class="preview-label">Image après seuillage</p>
+                            </div>
+                        </div>
+
+                        <div class="preview-content" id="coloredPreview" style="display: none;">
+                            <div class="preview-box">
+                                <img id="coloredImage" src="" alt="Vue couleurs">
+                                <p class="preview-label">Vue couleurs pour identifier les différentes pièces</p>
+                            </div>
+                            <div class="color-legend">
+                                <p style="color: #888; font-size: 0.85rem; margin-top: 15px;">
+                                    Chaque couleur représente un type de pièce différent pour faciliter le placement.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-container" id="statsContainer" style="display: none;">
+                    <div class="section-title">
+                        <span>Statistiques</span>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalPieces">0</div>
+                            <div class="stat-label">Pièces totales</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="gridSizeDisplay">0×0</div>
+                            <div class="stat-label">Taille grille</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="coverageDisplay">0%</div>
+                            <div class="stat-label">Couverture</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 20px;">
+                        <span>Liste des pièces nécessaires</span>
+                    </div>
+                    <div class="pieces-list" id="piecesList"></div>
+
+                    <div class="export-buttons">
+                        <button class="export-btn" id="exportJson">
+                            Exporter JSON
+                        </button>
+                        <button class="export-btn" id="downloadImage">
+                            Télécharger image N/B
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentImage = null;
+        let currentImageData = null;
+        let currentResult = null;
+        let thresholdTimeout = null;
+
+        // Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const imageInput = document.getElementById('imageInput');
+        const thumbnailPreview = document.getElementById('thumbnailPreview');
+        const threshold = document.getElementById('threshold');
+        const thresholdValue = document.getElementById('thresholdValue');
+        const invertCheckbox = document.getElementById('invert');
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const emptyState = document.getElementById('emptyState');
+        const statsContainer = document.getElementById('statsContainer');
+        const thresholdPreview = document.getElementById('thresholdPreview');
+        const thresholdPreviewImg = document.getElementById('thresholdPreviewImg');
+
+        // Upload handling
+        uploadZone.addEventListener('click', () => imageInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleImageSelect(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageSelect(e.target.files[0]);
+            }
+        });
+
+        function handleImageSelect(file) {
+            currentImage = file;
+            processBtn.disabled = false;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                thumbnailPreview.src = e.target.result;
+                thumbnailPreview.style.display = 'block';
+                currentImageData = e.target.result;
+                // Trigger live threshold preview
+                updateThresholdPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Live threshold preview
+        async function updateThresholdPreview() {
+            if (!currentImage) return;
+
+            const formData = new FormData();
+            formData.append('image', currentImage);
+            formData.append('threshold', threshold.value);
+            formData.append('invert', invertCheckbox.checked);
+
+            try {
+                const response = await fetch('/preview_threshold', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    thresholdPreviewImg.src = 'data:image/png;base64,' + result.preview_image;
+                    thresholdPreview.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Threshold preview error:', error);
+            }
+        }
+
+        // Debounced threshold update
+        function debouncedThresholdUpdate() {
+            clearTimeout(thresholdTimeout);
+            thresholdTimeout = setTimeout(updateThresholdPreview, 150);
+        }
+
+        // Threshold slider
+        threshold.addEventListener('input', (e) => {
+            thresholdValue.textContent = e.target.value;
+            debouncedThresholdUpdate();
+        });
+
+        // Invert checkbox
+        invertCheckbox.addEventListener('change', () => {
+            updateThresholdPreview();
+        });
+
+        // Piece selection
+        document.querySelectorAll('.piece-option').forEach(option => {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+
+            // Initialize state
+            option.classList.toggle('selected', checkbox.checked);
+
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                checkbox.checked = !checkbox.checked;
+                option.classList.toggle('selected', checkbox.checked);
+            });
+        });
+
+        // Preview tabs
+        document.querySelectorAll('.preview-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const tabName = tab.dataset.tab;
+                document.querySelectorAll('.preview-content').forEach(c => {
+                    c.style.display = 'none';
+                    c.classList.remove('active');
+                });
+
+                const targetPreview = document.getElementById(tabName + 'Preview');
+                if (targetPreview && currentResult) {
+                    targetPreview.style.display = 'block';
+                    targetPreview.classList.add('active');
+                }
+            });
+        });
+
+        // Process button
+        processBtn.addEventListener('click', async () => {
+            if (!currentImage) return;
+
+            const formData = new FormData();
+            formData.append('image', currentImage);
+            formData.append('threshold', threshold.value);
+            formData.append('grid_width', document.getElementById('gridWidth').value);
+            formData.append('grid_height', document.getElementById('gridHeight').value);
+            formData.append('invert', invertCheckbox.checked);
+            formData.append('show_colors', 'true');
+
+            document.querySelectorAll('input[name="pieces"]:checked').forEach(cb => {
+                formData.append('pieces', cb.value);
+            });
+
+            loading.classList.add('show');
+            emptyState.style.display = 'none';
+            document.querySelectorAll('.preview-content').forEach(c => c.style.display = 'none');
+            statsContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentResult = result;
+                    displayResults(result);
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erreur de connexion: ' + error.message);
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+
+        function displayResults(result) {
+            // Images
+            document.getElementById('legoImage').src = 'data:image/png;base64,' + result.preview_image;
+            document.getElementById('binaryImage').src = 'data:image/png;base64,' + result.binary_image;
+
+            if (result.colored_image) {
+                document.getElementById('coloredImage').src = 'data:image/png;base64,' + result.colored_image;
+            }
+
+            // Show active tab
+            const activeTab = document.querySelector('.preview-tab.active');
+            const tabName = activeTab ? activeTab.dataset.tab : 'lego';
+            document.getElementById(tabName + 'Preview').style.display = 'block';
+
+            // Stats
+            document.getElementById('totalPieces').textContent = result.total_pieces;
+            document.getElementById('gridSizeDisplay').textContent = `${result.grid_size.width}×${result.grid_size.height}`;
+            document.getElementById('coverageDisplay').textContent = result.coverage + '%';
+
+            // Pieces list with LEGO part numbers
+            const piecesList = document.getElementById('piecesList');
+            piecesList.innerHTML = '';
+
+            const pieceInfo = result.piece_info || {};
+
+            for (const [pieceId, count] of Object.entries(result.piece_counts)) {
+                const info = pieceInfo[pieceId] || {};
+                const item = document.createElement('div');
+                item.className = 'piece-count-item';
+                item.innerHTML = `
+                    <div class="piece-count-name">
+                        <span class="piece-count-title">${info.name || pieceId}</span>
+                        <span class="piece-count-ref">#${info.part_num || 'N/A'}</span>
+                    </div>
+                    <span class="piece-count-value">×${count}</span>
+                `;
+                piecesList.appendChild(item);
+            }
+
+            statsContainer.style.display = 'block';
+        }
+
+        // Export JSON
+        document.getElementById('exportJson').addEventListener('click', async () => {
+            if (!currentResult) return;
+
+            const response = await fetch('/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placements: currentResult.placements,
+                    piece_counts: currentResult.piece_counts,
+                    grid_size: currentResult.grid_size,
+                    piece_info: currentResult.piece_info
+                })
+            });
+
+            const data = await response.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lego_pattern.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Download image
+        document.getElementById('downloadImage').addEventListener('click', () => {
+            if (!currentResult) return;
+
+            const a = document.createElement('a');
+            a.href = 'data:image/png;base64,' + currentResult.preview_image;
+            a.download = 'lego_mold_pattern.png';
+            a.click();
+        });
+    </script>
+</body>
+</html>
