@@ -1,62 +1,56 @@
 @echo off
-chcp 65001 >nul
-title Legofy - Installation et démarrage
+title Legofy - Installation
 
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                                                              ║
-echo ║                    LEGOFY - Installation                     ║
-echo ║                                                              ║
-echo ║   Convertisseur d'images en motifs LEGO                      ║
-echo ║                                                              ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ========================================
+echo         LEGOFY - Installation
+echo ========================================
 echo.
 
-echo [1/3] Vérification de Python...
-python --version >nul 2>&1
+echo [1/3] Verification de Python...
+python --version
 if errorlevel 1 (
     echo.
-    echo ❌ ERREUR: Python n'est pas installé ou pas dans le PATH
+    echo ERREUR: Python n'est pas installe!
     echo.
-    echo Veuillez installer Python depuis: https://www.python.org/downloads/
+    echo Installez Python depuis: https://www.python.org/downloads/
     echo IMPORTANT: Cochez "Add Python to PATH" pendant l'installation!
     echo.
     pause
     exit /b 1
 )
-echo ✓ Python trouvé!
+echo OK - Python trouve!
 echo.
 
-echo [2/3] Installation des dépendances...
-pip install flask pillow numpy --quiet
+echo [2/3] Installation des dependances...
+echo Cela peut prendre 1-2 minutes...
+python -m pip install flask pillow numpy
 if errorlevel 1 (
     echo.
-    echo ❌ ERREUR lors de l'installation des dépendances
-    echo Essayez de lancer ce script en tant qu'administrateur
+    echo ERREUR lors de l'installation
+    echo Essayez: python -m pip install flask pillow numpy
     echo.
     pause
     exit /b 1
 )
-echo ✓ Dépendances installées!
+echo OK - Dependances installees!
 echo.
 
-echo [3/3] Démarrage de Legofy...
+echo [3/3] Demarrage de Legofy...
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                                                              ║
-echo ║   Legofy démarre sur: http://localhost:5001                  ║
-echo ║                                                              ║
-echo ║   Le navigateur va s'ouvrir automatiquement.                 ║
-echo ║                                                              ║
-echo ║   Pour arrêter: fermez cette fenêtre ou appuyez Ctrl+C       ║
-echo ║                                                              ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ========================================
+echo   Legofy demarre sur: http://localhost:5001
+echo.
+echo   Ouvrez votre navigateur et allez sur:
+echo   http://localhost:5001
+echo.
+echo   Pour arreter: fermez cette fenetre
+echo ========================================
 echo.
 
-:: Ouvrir le navigateur après 2 secondes
-start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:5001"
+timeout /t 3 /nobreak >nul
+start http://localhost:5001
 
-:: Lancer l'application
 python app.py
 
 pause
